@@ -22,7 +22,7 @@ public class PlatformerPlayerController : MonoBehaviour
     void Start()
     {
         playerAudio = GetComponent<AudioSource>();
-       rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
 
         if (groundCheck == null)
         {
@@ -38,7 +38,7 @@ public class PlatformerPlayerController : MonoBehaviour
         HorizontalInput = Input.GetAxis("Horizontal");
 
         // Check if the player is grounded
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+       
 
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
@@ -50,7 +50,7 @@ public class PlatformerPlayerController : MonoBehaviour
         
     }
 
-    private void FixedUpdate()
+     void FixedUpdate()
     {
         // move the player using ridgid body 2d in fixed update
         rb.velocity =new Vector2(HorizontalInput * MoveSpeed, rb.velocity.y);
