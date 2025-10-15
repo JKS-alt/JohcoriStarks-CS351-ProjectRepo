@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class PlatformerPlayerController : MonoBehaviour
 {
-    public float MoveSpeed =5f;
+    public float MoveSpeed = 5f;
     private Rigidbody2D rb;
     private float HorizontalInput;
     public float jumpForce = 10f;
