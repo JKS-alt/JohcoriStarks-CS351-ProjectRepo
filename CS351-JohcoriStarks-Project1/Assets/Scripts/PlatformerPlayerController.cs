@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class PlatformerPlayerController : MonoBehaviour
@@ -83,11 +84,11 @@ public class PlatformerPlayerController : MonoBehaviour
 
         if (HorizontalInput > 0)
         {
-            transform.localScale = new Vector3(12f, 12f, 1f);
+            transform.rotation = quaternion.Euler(0, 0, 0);
         }
         else if (HorizontalInput < 0)
         {
-            transform.localScale = new Vector3(-12f, 12f, 1f);
+            transform.localScale = new Vector3(0, 180, 0);
         }
         animator.SetFloat("x velocity", Mathf.Abs(rb.velocity.x));
         
