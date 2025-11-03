@@ -84,14 +84,13 @@ public class PlatformerPlayerController : MonoBehaviour
 
         if (HorizontalInput > 0)
         {
-            transform.rotation = quaternion.Euler(0, 0, 0);
+            transform.localScale = new Vector3(originalScale.x, originalScale.y, originalScale.z);
         }
         else if (HorizontalInput < 0)
         {
-            transform.localScale = new Vector3(0, 180, 0);
+            transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
         }
-        animator.SetFloat("x velocity", Mathf.Abs(rb.velocity.x));
-        
+
         if (HorizontalInput != 0f)
         {
             animator.SetBool("IsRunning", true);
