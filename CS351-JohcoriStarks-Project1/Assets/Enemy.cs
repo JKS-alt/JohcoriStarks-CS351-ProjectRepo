@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     //prefab to spawn when emeby die
     public GameObject DeathAffect;
 
+    private DisplayBar healthBar;
     public void TakeDamage(int damage)
     {
         health -= damage;
@@ -29,7 +30,13 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        //fix what bleow FIXME
+       // healthBar = GetComponentInChildren<>(HealthBar);
+        if (healthBar = null)
+        {
+            Debug.LogError("Healthabr not found");
+                 return;
+        }
     }
 
     // Update is called once per frame
