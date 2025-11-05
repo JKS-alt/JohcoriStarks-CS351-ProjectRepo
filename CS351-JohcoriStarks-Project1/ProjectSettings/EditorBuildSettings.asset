@@ -17,7 +17,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Animations Finshed.unity
     guid: 4f4cc4275092a8e438b20537fe3195d9
-  - enabled: 1
+  - enabled: 0
     path: Assets/Animation Updated.unity
     guid: 9ae120629c43d8743987a87e80accc51
+  - enabled: 1
+    path: Assets/fixed animations.unity
+    guid: 521b461b3bfa1294c8ce932c6fca3783
   m_configObjects: {}
