@@ -1,3 +1,9 @@
+/*
+ * Johcori Starks
+ * CS 351 – Lesson 9
+ * Handles player health, knockback, hurt animation, and death.
+ */
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,120 +11,124 @@ using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
-    // Variable to store the health of the player
+    // Player health
     public int health = 100;
 
-    // A reference to the health bar
-    // This must be set in the inspector
+    // UI Health Bar reference (set in Inspector)
     public DisplayBar healthBar;
 
+    // Rigidbody2D reference
     private Rigidbody2D rb;
 
-    // Knockback force when the player collides with an enemy
+    // Knockback force
     public float knockbackForce = 5f;
 
-    // A prefab to spawn when the player dies
-    // This must be set in the inspector
+    // Prefab to spawn when the player dies
     public GameObject playerDeathEffect;
 
-    // Bool to keep track if the player has been hit recently
+    // Prevent multiple hits in quick succession
     public static bool hitRecently = false;
 
-    // Time in seconds to recover from a hit
+    // Time before knockback/hit resets
     public float hitRecoveryTime = 0.2f;
-    // Start is called before the first frame update
+
+    // Animator for hit animation
+    private Animator anim;
+
+    // Audio for hit sound
+    private AudioSource playerAudio;
+    public AudioClip playerHitSound;
+
     void Start()
     {
-        // Set the RigidBody2D reference
         rb = GetComponent<Rigidbody2D>();
 
-        // Check if the RigidBody2D reference is null
         if (rb == null)
-        {
-            // Log an error message if the rb is null
             Debug.LogError("Rigidbody2D not found on player");
-        }
 
-        // Set the healthBar max value to the player's max health
-        //healthBar.SetMaxHealth(maxHealth);
+        // Setup health bar
+        if (healthBar != null)
+            healthBar.SetMaxValue(health);
 
         hitRecently = false;
 
+        // Animator reference
+        anim = GetComponent<Animator>();
+
+        // Audio reference
+        playerAudio = GetComponent<AudioSource>();
     }
-    // A function to knock the player back when they collide with an enemy
-    void Knockback(Vector2 enemyPosition)
+
+    // --------------------------------------------
+    // KNOCKBACK (Must be PUBLIC or Enemy cannot call it)
+    // --------------------------------------------
+    public void Knockback(Vector3 enemyPosition)
     {
-        // Check if the player was hit recently
         if (hitRecently)
-        {
             return;
-        }
 
-        // Get the direction of the knockback
-        Vector2 knockbackDirection = (rb.position - enemyPosition).normalized;
-
-        // Apply the knockback force
-        rb.AddForce(knockbackDirection * knockbackForce, ForceMode2D.Impulse);
-
-        // Reduce the player's health
-      // currentHealth -= damageAmount;
-
-        // Update the health bar
-        //healthBar.SetHealth(currentHealth);
-
-        // Set hitRecently to true to prevent multiple hits in quick succession
         hitRecently = true;
 
-        // Start the coroutine to reset hitRecently after a delay
-        StartCoroutine(ResetHitRecently());
+        // Start recovery IF object is still active
+        if (gameObject.activeInHierarchy)
+            StartCoroutine(RecoverFromHit());
+
+        // Calculate knockback direction
+        Vector2 direction = transform.position - enemyPosition;
+        direction.Normalize();
+        direction.y = 0.8f; // upward force
+
+        rb.AddForce(direction * knockbackForce, ForceMode2D.Impulse);
+
+        // Hurt animation
+        if (anim != null)
+            anim.SetBool("hit", true);
     }
-    // Coroutine to reset hitRecently after hitRecoveryTime seconds
-    IEnumerator ResetHitRecently()
+
+    // --------------------------------------------
+    // RESET HIT FLAG
+    // --------------------------------------------
+    IEnumerator RecoverFromHit()
     {
-        // Wait for hitRecoveryTime seconds
         yield return new WaitForSeconds(hitRecoveryTime);
 
-        // Reset hitRecently to false
         hitRecently = false;
+
+        if (anim != null)
+            anim.SetBool("hit", false);
     }
-    // A function to take damage
+
+    // --------------------------------------------
+    // TAKE DAMAGE
+    // --------------------------------------------
     public void TakeDamage(int damage)
     {
-        // Subtract the damage from the health
         health -= damage;
 
-        // Update the health bar
-        healthBar.SetValue(health);
+        if (healthBar != null)
+            healthBar.SetValue(health);
 
-        // TODO: Play a sound effect when the player takes damage
-        // TODO: Play an animation when the player takes damage
+        // Play hurt sound
+        if (playerAudio != null && playerHitSound != null)
+            playerAudio.PlayOneShot(playerHitSound);
 
-        // If the health is less than or equal to 0
         if (health <= 0)
-        {
-            // Call the Die method
-           Die();
-        }
+            Die();
     }
-    // A function to die
+
+    // --------------------------------------------
+    // DIE
+    // --------------------------------------------
     public void Die()
     {
-        // Set gameOver to true
-       // ScoreManager.gameOver = true;
+        // Notify game-over manager
+        ScoreScript.gameOver = true; // dont chnage because score manager is named ScoreScript
 
-        // TODO: Play a sound effect when the player dies
-        // TODO: Add the player death effect when the player dies
-         GameObject deathEffect = Instantiate(playerDeathEffect, transform.position, Quaternion.identity);
+        // Spawn death effect
+        if (playerDeathEffect != null)
+            Instantiate(playerDeathEffect, transform.position, Quaternion.identity);
 
-        // Destroy the death effect after 2 seconds
-        Destroy(deathEffect, 2f);
-
-        // Disable the player object
+        // Disable player
         gameObject.SetActive(false);
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
