@@ -93,6 +93,9 @@ public class FlyingPatrolChase : MonoBehaviour
         else if (!IsPlayerInChaseRange() && currentState == EnemyState.Chasing)
         {
             currentState = EnemyState.Patrolling;
+
+            
+            target = patrolPoints[currentPatrolPointIndex];
         }
     }
 

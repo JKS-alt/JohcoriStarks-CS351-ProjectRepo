@@ -4,30 +4,23 @@ using UnityEngine;
 
 public class ShootProjectile : MonoBehaviour
 {
-    public GameObject ProjectilePrefab;
-    public Transform Firepoint;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Transform firePoint;      // assign FirePoint empty object
+    public GameObject projectile;    // assign projectile prefab
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetButtonDown("Fire1"))
-        {
             Shoot();
-        }
-            
+    }
 
-        }
-
-
-    
-
-    void Shoot ()
+    void Shoot()
     {
-        Instantiate(ProjectilePrefab, Firepoint.position, Firepoint.rotation);
+        GameObject bullet = Instantiate(projectile, firePoint.position, firePoint.rotation);
+
+        // destroy after 3 seconds to avoid buildup
+        Destroy(bullet, 3f);
     }
 }
+
+
+

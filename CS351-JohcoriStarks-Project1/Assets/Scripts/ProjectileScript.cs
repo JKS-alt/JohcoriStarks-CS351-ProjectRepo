@@ -4,17 +4,33 @@ using UnityEngine;
 
 public class ProjectileScript : MonoBehaviour
 {
+    public float speed = 10f;
+    public GameObject impactEffect;   // assign prefab in inspector
+
     private Rigidbody2D rb;
-    public float speed = 20f;
-    // Start is called before the first frame update
+
     void Start()
     {
-       rb = GetComponent<Rigidbody2D>();
-        rb.velocity = transform.right * speed;    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        rb = GetComponent<Rigidbody2D>();
+        rb.velocity = transform.right * speed;
     }
+
+    void OnTriggerEnter2D(Collider2D hitInfo)
+    {
+        Enemy enemy = hitInfo.GetComponent<Enemy>();
+
+        if (enemy != null)
+        {
+          //  enemy.TakeDamage(1);
+
+            // spawn impact effect
+            if (impactEffect != null)
+            {
+                Instantiate(impactEffect, transform.position, transform.rotation);
+            }
+        }
+
+        Destroy(gameObject); // destroy projectile on hit
+    }
+
 }
