@@ -6,31 +6,30 @@ using UnityEngine.UI;
 public class DisplayBar : MonoBehaviour
 {
     public Slider slider;
-
-    // gradient for the fill color (green → red)
     public Gradient gradient;
-
-    // the UI Image for the slider's fill
     public Image fill;
 
-    // set the current value of the slider
     public void SetValue(float value)
     {
         slider.value = value;
 
-        // update the color of the fill based on value (0–1)
-       
+        if (fill != null)
+        {
+            // 0–1 value based on current / max
             fill.color = gradient.Evaluate(slider.normalizedValue);
+        }
     }
 
-    // initialize the slider at full
     public void SetMaxValue(float value)
     {
         slider.maxValue = value;
         slider.value = value;
 
-        // ensure full HP starts with the highest gradient color
-       
+        if (fill != null)
+        {
+            // full health color
             fill.color = gradient.Evaluate(1f);
+        }
     }
 }
+

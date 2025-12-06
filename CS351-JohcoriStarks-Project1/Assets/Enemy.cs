@@ -13,30 +13,27 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         currentHealth = maxHealth;
-        HealthBar.SetValue(currentHealth);
-        // Initialize health bar with RAW health values (as in slides)
+
         if (HealthBar != null)
         {
-            HealthBar.SetMaxValue(maxHealth);
-            HealthBar.SetValue(currentHealth);
+            HealthBar.SetMaxValue(1f);
+            HealthBar.SetValue(1f);
         }
     }
 
     public void TakeDamage(int damage)
     {
-        currentHealth -= damage;
-        HealthBar.SetMaxValue(currentHealth);
-        Debug.Log("Enemy took damage: " + currentHealth + "/" + maxHealth);
+         currentHealth -= damage;
+        Debug.Log("PERCENT = " + ((float)currentHealth / maxHealth));
 
         if (HealthBar != null)
         {
-            HealthBar.SetValue(currentHealth);   // raw value, slide-correct
+            float percent = (float)currentHealth / maxHealth;
+            HealthBar.SetValue(percent);
         }
 
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
 
     void Die()
