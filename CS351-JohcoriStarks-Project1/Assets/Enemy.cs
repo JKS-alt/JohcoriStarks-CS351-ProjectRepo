@@ -4,129 +4,52 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    // Range at which the enemy will chase the player
-    public float chaseRange = 4f;
+    public int maxHealth = 3;
+    private int currentHealth;
 
-    // Speed of the enemy movement
-    public float enemyMovementSpeed = 1.5f;
-
-    // Reference to the player's transform
-    private Transform playerTransform;
-
-    // Rigidbody reference
-    private Rigidbody2D rb;
-
-    // Animator reference
-    private Animator anim;
+    public GameObject deathEffect;
+    public DisplayBar HealthBar;
 
     void Start()
     {
-        // Get Rigidbody
-        rb = GetComponent<Rigidbody2D>();
-
-        // Get Animator
-        anim = GetComponent<Animator>();
-
-        // Get the player's transform using the "Player" tag
-        playerTransform = GameObject.FindWithTag("Player").transform;
-    }
-
-    void Update()
-    {
-        // Get direction from enemy to player
-        Vector2 playerDirection = playerTransform.position - transform.position;
-
-        // Distance between enemy and player
-        float distanceToPlayer = playerDirection.magnitude;
-
-        // Check if player is within chase range
-        if (distanceToPlayer <= chaseRange)
+        currentHealth = maxHealth;
+        HealthBar.SetValue(currentHealth);
+        // Initialize health bar with RAW health values (as in slides)
+        if (HealthBar != null)
         {
-            // Only move on the X-axis
-            playerDirection.Normalize();
-            playerDirection.y = 0f;
-
-            // Face the player
-            FacePlayer(playerDirection);
-
-            // If there is ground ahead → move
-            if (IsGroundAhead())
-            {
-                MoveTowardsPlayer(playerDirection);
-            }
-            else
-            {
-                StopMoving();
-            }
-        }
-        else
-        {
-            // Idle if player is out of range
-            StopMoving();
+            HealthBar.SetMaxValue(maxHealth);
+            HealthBar.SetValue(currentHealth);
         }
     }
 
-    // -----------------------------------------
-    // CHECK IF THERE IS GROUND AHEAD
-    // -----------------------------------------
-    bool IsGroundAhead()
+    public void TakeDamage(int damage)
     {
-        // Distance to check for ground
-        float groundCheckDistance = 2.0f;
+        currentHealth -= damage;
+        HealthBar.SetMaxValue(currentHealth);
+        Debug.Log("Enemy took damage: " + currentHealth + "/" + maxHealth);
 
-        // Layer mask for ground
-        LayerMask groundLayer = LayerMask.GetMask("Ground");
-
-        // Determine facing direction based on rotation
-        Vector2 enemyFacingDirection = transform.rotation == Quaternion.Euler(0, 0, 0)
-            ? Vector2.left
-            : Vector2.right;
-
-        // Raycast from the enemy's position, outward
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, enemyFacingDirection, groundCheckDistance, groundLayer);
-
-        // Return true if ground is detected
-        return hit.collider != null;
-    }
-
-    // -----------------------------------------
-    // FACE TOWARD PLAYER
-    // -----------------------------------------
-    private void FacePlayer(Vector2 playerDirection)
-    {
-        if (playerDirection.x < 0)
+        if (HealthBar != null)
         {
-            // Face left
-            transform.rotation = Quaternion.Euler(0, 0, 0);
+            HealthBar.SetValue(currentHealth);   // raw value, slide-correct
         }
-        else
+
+        if (currentHealth <= 0)
         {
-            // Face right
-            transform.rotation = Quaternion.Euler(0, 180, 0);
+            Die();
         }
     }
 
-    // -----------------------------------------
-    // MOVE TOWARD PLAYER
-    // -----------------------------------------
-    private void MoveTowardsPlayer(Vector2 playerDirection)
+    void Die()
     {
-        // Move enemy on X-axis
-        rb.velocity = new Vector2(playerDirection.x * enemyMovementSpeed, rb.velocity.y);
+        if (deathEffect != null)
+        {
+            GameObject effect = Instantiate(deathEffect, transform.position, Quaternion.identity);
+            Destroy(effect, 0.1f);
+        }
 
-        // Play walk animation
-        anim.SetBool("isMoving", true);
-    }
+        if (HealthBar != null)
+            Destroy(HealthBar.gameObject);
 
-    // -----------------------------------------
-    // STOP MOVING + IDLE ANIMATION
-    // -----------------------------------------
-    private void StopMoving()
-    {
-        // Stop X movement
-        rb.velocity = new Vector2(0, rb.velocity.y);
-
-        // Switch animation to idle
-        anim.SetBool("isMoving", false);
+        Destroy(gameObject);
     }
 }

@@ -4,23 +4,44 @@ using UnityEngine;
 
 public class ShootProjectile : MonoBehaviour
 {
-    public Transform firePoint;      // assign FirePoint empty object
-    public GameObject projectile;    // assign projectile prefab
+    public Transform firePoint;             // Where the bullet spawns
+    public GameObject projectilePrefab;     // The projectile prefab you drag in the Inspector
 
     void Update()
     {
+       
+        // Listen for left click or Fire1 input
         if (Input.GetButtonDown("Fire1"))
+        {
+            Debug.Log("FIRE BUTTON PRESSED");
             Shoot();
+        }
     }
 
     void Shoot()
     {
-        GameObject bullet = Instantiate(projectile, firePoint.position, firePoint.rotation);
+        Debug.Log("SHOOT FUNCTION CALLED");
 
-        // destroy after 3 seconds to avoid buildup
+
+        // Spawn the projectile at the FirePoint position/rotation
+        GameObject bullet = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        
+        // Debug to verify the bullet actually spawned and where
+        if (bullet != null)
+        {
+            Debug.Log("Bullet spawned at: " + bullet.transform.position);
+            bullet.transform.position = new Vector3(
+            bullet.transform.position.x,
+            bullet.transform.position.y,
+             0     // force Z to zero
+            );
+        }
+        else
+        {
+            Debug.LogError("PROJECTILE FAILED TO SPAWN!");
+        }
+
+        // Destroy bullet after 3 seconds (prevents memory buildup)
         Destroy(bullet, 3f);
     }
 }
-
-
-

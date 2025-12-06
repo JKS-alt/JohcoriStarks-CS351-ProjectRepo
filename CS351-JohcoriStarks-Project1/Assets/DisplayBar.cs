@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,26 +7,30 @@ public class DisplayBar : MonoBehaviour
 {
     public Slider slider;
 
-    // Gradient for the health bar
+    // gradient for the fill color (green → red)
     public Gradient gradient;
 
-    // Image for the fill of the health bar
+    // the UI Image for the slider's fill
     public Image fill;
 
-    // Set current slider value
+    // set the current value of the slider
     public void SetValue(float value)
     {
         slider.value = value;
 
-        // Set fill color based on health percentage
-        if (fill != null)
+        // update the color of the fill based on value (0–1)
+       
             fill.color = gradient.Evaluate(slider.normalizedValue);
     }
 
-    // Set maximum slider value
+    // initialize the slider at full
     public void SetMaxValue(float value)
     {
         slider.maxValue = value;
         slider.value = value;
+
+        // ensure full HP starts with the highest gradient color
+       
+            fill.color = gradient.Evaluate(1f);
     }
 }
