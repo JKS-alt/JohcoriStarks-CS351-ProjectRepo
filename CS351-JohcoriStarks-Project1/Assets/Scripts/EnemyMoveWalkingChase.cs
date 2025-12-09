@@ -39,6 +39,13 @@ public class EnemyMoveWalkingChase : MonoBehaviour
     void Update()
     {
         Debug.Log("CRAB DEBUG: Update() running");
+        if (ScoreScript.gameOver)
+        {
+            Debug.Log("CRAB DEBUG: Game over → enemy stopping.");
+            rb.velocity = Vector2.zero;
+            anim.SetBool("isMoving", false);
+            return;
+        }
 
         if (playerTransform == null)
         {
@@ -119,6 +126,7 @@ public class EnemyMoveWalkingChase : MonoBehaviour
         Debug.Log("CRAB DEBUG: MOVING. X velocity = " + (playerDirection.x * enemyMovementSpeed));
         rb.velocity = new Vector2(playerDirection.x * enemyMovementSpeed, rb.velocity.y);
         anim.SetBool("isMoving", true);
+
     }
 
     void StopMoving()

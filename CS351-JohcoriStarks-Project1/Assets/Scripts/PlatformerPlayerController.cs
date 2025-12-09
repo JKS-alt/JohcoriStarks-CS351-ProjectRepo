@@ -1,10 +1,9 @@
 // Author: Johcori Starks
 // date 9/22/2025
 // Description controll plat former player
+
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection.Emit;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class PlatformerPlayerController : MonoBehaviour
@@ -20,36 +19,25 @@ public class PlatformerPlayerController : MonoBehaviour
     public AudioClip JumpSound;
     private AudioSource playerAudio;
     private Animator animator;
-    private Vector3 originalScale;
     private float jumpBufferTime = 0.1f;
     private float jumpBufferCounter;
 
-    // Start is called before the first frame update
     void Start()
     {
         animator = GetComponent<Animator>();
-
         playerAudio = GetComponent<AudioSource>();
         rb = GetComponent<Rigidbody2D>();
-
-        if (groundCheck == null)
-        {
-            Debug.LogError("GroundCheck not assigned to the player controller!");
-        }
-        originalScale = transform.localScale;
-
     }
 
-    // Update is called once per frame
     void Update()
     {
+        if (PlayerHealth.hitRecently)
+        {
+            animator.SetBool("IsRunning", false);
+            return;
+        }
 
         HorizontalInput = Input.GetAxis("Horizontal");
-
-        // Check if the player is grounded
-
-
-       
 
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
@@ -60,46 +48,28 @@ public class PlatformerPlayerController : MonoBehaviour
         }
 
         jumpBufferCounter -= Time.deltaTime;
-
     }
 
     void FixedUpdate()
     {
-        // move the player using ridgid body 2d in fixed update
+        if (PlayerHealth.hitRecently)
+            return;
+
         rb.velocity = new Vector2(HorizontalInput * MoveSpeed, rb.velocity.y);
-       
-        // Check if the player is grounded
-        // Check if the player is grounded FIRST
+
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        // Delay ground check briefly after jumping
         if (jumpBufferCounter <= 0f)
-        {
             isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        }
 
         animator.SetBool("isGrounded", isGrounded);
         animator.SetFloat("yVelocity", rb.velocity.y);
 
-
         if (HorizontalInput > 0)
-        {
             transform.rotation = Quaternion.Euler(0, 0, 0);
-        }
         else if (HorizontalInput < 0)
-        {
             transform.rotation = Quaternion.Euler(0, 180, 0);
-        }
 
-        if (HorizontalInput != 0f)
-        {
-            animator.SetBool("IsRunning", true);
-        }
-        else
-        {
-            animator.SetBool("IsRunning", false);
-        }
-
-       
+        animator.SetBool("IsRunning", HorizontalInput != 0f);
     }
 }
