@@ -19,17 +19,10 @@ public class EnemyMoveWalkingChase : MonoBehaviour
         Debug.Log("CRAB DEBUG: Start() called");
 
         rb = GetComponent<Rigidbody2D>();
-        Debug.Log("CRAB DEBUG: rb = " + rb);
-
         anim = GetComponent<Animator>();
-        Debug.Log("CRAB DEBUG: anim = " + anim);
-
         sr = GetComponent<SpriteRenderer>();
-        Debug.Log("CRAB DEBUG: SpriteRenderer = " + sr);
 
         GameObject p = GameObject.FindWithTag("Player");
-        Debug.Log("CRAB DEBUG: Player object found? " + (p != null));
-
         if (p != null)
             playerTransform = p.transform;
 
@@ -38,25 +31,18 @@ public class EnemyMoveWalkingChase : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("CRAB DEBUG: Update() running");
         if (ScoreScript.gameOver)
         {
-            Debug.Log("CRAB DEBUG: Game over → enemy stopping.");
             rb.velocity = Vector2.zero;
             anim.SetBool("isMoving", false);
             return;
         }
 
         if (playerTransform == null)
-        {
-            Debug.LogError("CRAB ERROR: playerTransform is NULL. Did you tag your player?");
             return;
-        }
 
         Vector2 playerDirection = playerTransform.position - transform.position;
         float distanceToPlayer = playerDirection.magnitude;
-
-        Debug.Log("CRAB DEBUG: Distance to player = " + distanceToPlayer);
 
         if (distanceToPlayer <= chaseRange)
         {
@@ -67,16 +53,16 @@ public class EnemyMoveWalkingChase : MonoBehaviour
 
             FacePlayer(playerDirection);
 
-            if (IsGroundAhead())
+            // ⭐ NEW CLEAN LOGIC
+            if (!IsGroundAhead())
             {
-                Debug.Log("CRAB DEBUG: Ground ahead → move toward player");
-                MoveTowardsPlayer(playerDirection);
-            }
-            else
-            {
-                Debug.Log("CRAB DEBUG: NO ground ahead → stop");
+                Debug.Log("CRAB DEBUG: No ground ahead — stopping");
                 StopMoving();
+                return;  // <--- prevents crab from still moving this frame
             }
+
+            // If ground exists, keep chasing
+            MoveTowardsPlayer(playerDirection);
         }
         else
         {
@@ -87,38 +73,36 @@ public class EnemyMoveWalkingChase : MonoBehaviour
 
     bool IsGroundAhead()
     {
-        float groundCheckDistance = 2.0f;
-        LayerMask groundLayer = LayerMask.GetMask("Ground");
+        float groundCheckDistance = 1.2f;
+        int groundLayer = LayerMask.GetMask("Ground");
 
-        Vector2 enemyFacingDirection = (sr.flipX == false) ? Vector2.left : Vector2.right;
-        Vector2 rayDir = Vector2.down + enemyFacingDirection;
+        Vector2 forward = (sr.flipX == false) ? Vector2.left : Vector2.right;
+        Vector2 rayDir = (forward + Vector2.down).normalized;
 
-        Debug.Log("CRAB DEBUG: Raycast direction = " + rayDir);
+        Vector2 rayOrigin = (Vector2)transform.position + forward * 0.3f;
 
-        Debug.DrawRay(transform.position, rayDir * groundCheckDistance, Color.red);
+        Debug.DrawRay(rayOrigin, rayDir * groundCheckDistance, Color.red);
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, rayDir, groundCheckDistance, groundLayer);
+        RaycastHit2D hit = Physics2D.Raycast(
+            rayOrigin,
+            rayDir,
+            groundCheckDistance,
+            groundLayer
+        );
 
         if (hit.collider == null)
         {
-            Debug.LogWarning("CRAB DEBUG: Raycast did NOT hit ground!");
+            Debug.Log("CRAB DEBUG: No ground tile hit — ledge detected");
             return false;
         }
-        else
-        {
-            Debug.Log("CRAB DEBUG: Raycast HIT ground collider: " + hit.collider.name);
-            return true;
-        }
+
+        Debug.Log("CRAB DEBUG: Ground tile detected: " + hit.collider.name);
+        return true;
     }
 
     void FacePlayer(Vector2 playerDirection)
     {
-        Debug.Log("CRAB DEBUG: Facing player. X = " + playerDirection.x);
-
-        if (playerDirection.x < 0)
-            sr.flipX = false;
-        else
-            sr.flipX = true;
+        sr.flipX = playerDirection.x > 0;
     }
 
     void MoveTowardsPlayer(Vector2 playerDirection)
@@ -126,7 +110,6 @@ public class EnemyMoveWalkingChase : MonoBehaviour
         Debug.Log("CRAB DEBUG: MOVING. X velocity = " + (playerDirection.x * enemyMovementSpeed));
         rb.velocity = new Vector2(playerDirection.x * enemyMovementSpeed, rb.velocity.y);
         anim.SetBool("isMoving", true);
-
     }
 
     void StopMoving()
